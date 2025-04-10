@@ -1,0 +1,28 @@
+@import "../../../../../assets/styles/main.scss";
+
+.file-container {
+  border: 5px solid $grey;
+  width: 250px;
+  margin: 5px;
+  border-radius: 5px;
+
+  .file-image {
+    height: 100%;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  .file-name {
+    width: 100%;
+    text-align: center;
+    color: $grey;
+    background-color: $grey-blue;
+    font-weight: bold;
+    padding: 5px;
+  }
+
+  &:hover {
+    margin: 0;
+    padding: 5px;
+  }
+}
