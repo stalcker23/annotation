@@ -27,7 +27,6 @@
 
   .preview {
     @include fadeIn;
-
     position: absolute;
     top: 0;
     bottom: 0;
@@ -58,6 +57,7 @@
       }
 
       &image {
+        min-height: 250px;
         height: 100%;
         width: 100%;
       }
