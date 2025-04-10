@@ -1,16 +1,13 @@
 @import "../../../../../assets/styles/main.scss";
-
-.files-container, .info {
-  text-align: center;
-  font-weight: 700;
-  width: 100%
-}
-
 .info {
   padding-top: 50px;
-  margin: 10px 0;
+  width: 100%;
+  text-align: center;
+  margin: 10px 0 10px;
+  font: 20px;
   color: $grey;
-  font-size: 20px
+  font-size: 20px;
+  font-weight: bold;
 }
 
 .files-container {
@@ -18,25 +15,43 @@
   flex-wrap: wrap;
   justify-content: space-between;
   margin-bottom: 10px;
-  top: 0;
-  right: 0;
-  background-color: rgba(128,128,128,.6);
-  z-index: 2;
-  left: 0;
-  bottom: 0;
-  color: $white;
-  background-color: $grey;
-  padding: 5px
-}
 
-.file- {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%)
-}
+  .preview {
+    @include fadeIn;
 
-&image {
-  height: 100%;
-  width: 100%
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(128, 128, 128, 0.6);
+    z-index: 2;
+
+    .close-preview {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      color: $white;
+      background-color: $grey;
+      font-weight: bold;
+      padding: 5px;
+    }
+
+    .file- {
+      &container {
+        height: calc(100% - 40px);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      &image {
+        height: 100%;
+        width: 100%;
+      }
+    }
+  }
 }
