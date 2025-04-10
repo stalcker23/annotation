@@ -10,6 +10,15 @@
   font-weight: bold;
 }
 
+.overload {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: -1;
+  cursor: pointer;
+}
+
 .files-container {
   display: flex;
   flex-wrap: wrap;

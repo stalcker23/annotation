@@ -4,6 +4,7 @@
     <page [page]="page" (selectForPreview)="selectForPreview($event)"></page>
   } @if (selectedImage) {
     <div class="preview">
+      <div class="overload" (click)="closePreview()"></div>
       <div class="file-container">
         <img class="file-image" [src]="selectedImage" />
         <button class="close-preview" (click)="closePreview()">
