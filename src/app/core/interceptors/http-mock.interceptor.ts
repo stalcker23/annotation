@@ -24,7 +24,7 @@ export class HttpMockInterceptor implements HttpInterceptor {
         const { url, method, headers, body } = req;
         const handleRoute = (): Observable<any> => {
             switch (true) {
-              case url.match(/\/config\/\d+$/) && method === "GET":
+                case url.match(/\/config\/\d+$/) && method === "GET":
                     return getConfig();
                 case url.match(/\/image\/\d+$/) && method === "GET":
                     return getImage();
@@ -50,7 +50,7 @@ export class HttpMockInterceptor implements HttpInterceptor {
                 new HttpResponse({
                     status: 200,
                     body:
-                        "/assets/mock/" +
+                        "assets/mock/" +
                         configData.pages.find((page) => page.number === id)
                             ?.imageUrl,
                 })
