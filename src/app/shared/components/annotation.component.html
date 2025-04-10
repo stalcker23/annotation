@@ -11,7 +11,7 @@
     <textarea [style]="{width: annotation.width + 'px', height: annotation.height + 'px', 'border-color': getBorderColor}"
             (mouseup)="onResize($event)"
             (focusout)="onFocusOut($event)"
-            class="example-box">
+            class="annotation-box">
       {{annotation.value}}
     </textarea>
   } @else {
