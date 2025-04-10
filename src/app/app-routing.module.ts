@@ -4,7 +4,8 @@ import { DashboardComponent } from "./core/pages/dashboard/dashboard.component";
 import { ViewComponent } from "./core/pages/view/view.component";
 
 const routes: Routes = [
-    { path: "", redirectTo: "dashboard/:id", pathMatch: "full" },
+    { path: "", redirectTo: "dashboard", pathMatch: "full" },
+    { path: "dashboard", component: DashboardComponent },
     { path: "dashboard/:id", component: DashboardComponent },
     { path: "view/:image", component: ViewComponent },
 ];

@@ -1,29 +1,36 @@
-<div cdkDragBoundary=".images-container" #annotationView cdkDrag (cdkDragEnded)="onDragEnded($event)" class="example-boundary">
+<div cdkDragBoundary=".images-container"
+     #annotationView
+     cdkDrag
+     (cdkDragEnded)="onDragEnded($event)"
+     class="annotation-boundary">
   <div class="actions">
-    <div class="example-handle" cdkDragHandle>
-      &#x271C;
-    </div>
-    <div class="example-remove" (click)="removeText()">
-      &#x2716;
-    </div>
+    <div class="annotation-handle" cdkDragHandle>&#x271C;</div>
+    <div class="annotation-remove" (click)="removeText()">&#x2716;</div>
   </div>
   @if (annotation.type === AnnotationType.Text) {
-    <textarea [style]="{width: annotation.width + 'px', height: annotation.height + 'px', 'border-color': getBorderColor}" (mouseup)="onResize($event)" (focusout)="onFocusOut($event)" class="example-box">
+    <textarea [style]="{width: annotation.width + 'px', height: annotation.height + 'px', 'border-color': getBorderColor}"
+            (mouseup)="onResize($event)"
+            (focusout)="onFocusOut($event)"
+            class="example-box">
       {{annotation.value}}
     </textarea>
-  }
-  @else {
+  } @else {
     <div class="annotation-image-container">
       <label class="annotation-image-label" for="img{{annotation.id}}">
         @if (!annotation.value) {
-        <span>Upload image</span>
+          <span>Upload image</span>
+        } @else {
+          <img [style]="{'border-color': getBorderColor}"
+               class="annotation-image"
+               [attr.src]="annotation.value" />
         }
-        @else {
-          <img [style]="{'border-color': getBorderColor}" class="annotation-image" [attr.src]="annotation.value">
-        }
-      </label>
-      <input id="img{{annotation.id}}" alt="1" type="file" (change)="onFileChanged($event)" accept="image/*" style="display:none;">
+        </label>
+        <input id="img{{annotation.id}}"
+               alt="1"
+               type="file"
+               (change)="onFileChanged($event)"
+               accept="image/*"
+               style="display:none;" />
     </div>
   }
 </div>
-

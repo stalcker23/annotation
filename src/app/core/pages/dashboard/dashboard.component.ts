@@ -1,23 +1,24 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
-import { FilesComponent } from "./files/files.component";
 import { ApiService } from "../../services/api.service";
 import { Subject } from "rxjs/internal/Subject";
 import { takeUntil } from "rxjs/internal/operators/takeUntil";
 import { ActivatedRoute } from "@angular/router";
-import { Page } from "../../../shared/models/models";
 import { PagesService } from "../../services/pages.service";
+import { PagesComponent } from "./pages/pages.component";
+import { Page } from "../../../shared/types/types";
 
 @Component({
     selector: "dashboard",
     templateUrl: "./dashboard.component.html",
     standalone: true,
     providers: [ApiService, PagesService],
-    imports: [FilesComponent],
+    imports: [PagesComponent],
     styleUrl: "./dashboard.component.scss",
 })
 export class DashboardComponent implements OnInit, OnDestroy {
     private destroy$ = new Subject<void>();
-    public pages: Page[] = [];
+    public pages!: Page[];
+
     constructor(
         private apiService: ApiService,
         private pagesService: PagesService,
@@ -25,6 +26,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     ) {}
 
     public ngOnInit(): void {
+        this.initPages();
+    }
+
+    public initPages() {
         const id = this.route.snapshot.paramMap.get("id");
 
         if (!this.pagesService.pages.length) {

@@ -10,29 +10,33 @@ import { Subject } from "rxjs/internal/Subject";
 import { takeUntil } from "rxjs";
 import { ApiService } from "../../../services/api.service";
 import { Router } from "@angular/router";
-import { Page } from "../../../../shared/models/models";
+import { Page } from "../../../../shared/types/types";
 
 @Component({
-    selector: "file",
-    templateUrl: "./file.component.html",
+    selector: "page",
+    templateUrl: "./page.component.html",
     standalone: true,
-    styleUrl: "./file.component.scss",
+    styleUrl: "./page.component.scss",
 })
-export class FileComponent implements OnInit, OnDestroy {
+export class PageComponent implements OnInit, OnDestroy {
     @Input()
-    public page: Page = null;
-    private destroy$ = new Subject<void>();
-
-    public image = "";
+    public page!: Page;
 
     @Output()
     public selectForPreview = new EventEmitter<string>();
+
+    private destroy$ = new Subject<void>();
+    public image = "";
     constructor(
         private apiService: ApiService,
         private router: Router
     ) {}
 
     public ngOnInit(): void {
+        this.initImage();
+    }
+
+    public initImage() {
         this.apiService
             .getImage(this.page)
             .pipe(takeUntil(this.destroy$))

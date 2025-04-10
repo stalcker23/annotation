@@ -1,0 +1,16 @@
+<div class="info">Click on Image for Preview</div>
+<div class="files-container">
+  @for (page of pages; track page?.number) {
+    <page [page]="page" (selectForPreview)="selectForPreview($event)"></page>
+  } @if (selectedImage) {
+    <div class="preview">
+      <div class="file-container">
+        <img class="file-image" [src]="selectedImage" />
+        <button class="close-preview" (click)="closePreview()">
+          Close Preview
+        </button>
+      </div>
+    </div>
+  }
+</div>
+

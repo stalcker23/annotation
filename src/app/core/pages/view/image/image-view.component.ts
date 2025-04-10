@@ -1,8 +1,8 @@
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import { Subject } from "rxjs/internal/Subject";
-import { Page } from "../../../../shared/models/models";
 import { ApiService } from "../../../services/api.service";
 import { takeUntil } from "rxjs";
+import { Page } from "../../../../shared/types/types";
 
 @Component({
     selector: "image-view",
@@ -12,15 +12,18 @@ import { takeUntil } from "rxjs";
 })
 export class ImageViewComponent implements OnInit, OnDestroy {
     @Input()
-    public page: Page = null;
+    public page!: Page;
 
     public image = "";
+    private destroy$ = new Subject<void>();
 
     constructor(private apiService: ApiService) {}
 
-    private destroy$ = new Subject<void>();
-
     public ngOnInit(): void {
+        this.initImage();
+    }
+
+    public initImage() {
         this.apiService
             .getImage(this.page)
             .pipe(takeUntil(this.destroy$))

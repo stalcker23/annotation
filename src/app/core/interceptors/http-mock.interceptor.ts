@@ -7,14 +7,12 @@ import {
     HttpResponse,
     HttpClient,
 } from "@angular/common/http";
-import { map, Observable, of } from "rxjs";
+import { Observable, of } from "rxjs";
 
 import * as configData from "../../../assets/mock/config.json";
 
 @Injectable()
 export class HttpMockInterceptor implements HttpInterceptor {
-    public appDataConfig: any;
-
     constructor(private http: HttpClient) {}
 
     intercept(
@@ -28,6 +26,10 @@ export class HttpMockInterceptor implements HttpInterceptor {
                     return getConfig();
                 case url.match(/\/image\/\d+$/) && method === "GET":
                     return getImage();
+                case url.endsWith("/annotations") && method === "GET":
+                    return getAnnotations();
+                case url.endsWith("/annotations") && method === "POST":
+                    return setAnnotations(body);
                 default:
                     return next.handle(req);
             }
@@ -38,6 +40,29 @@ export class HttpMockInterceptor implements HttpInterceptor {
                 new HttpResponse({
                     status: 200,
                     body: configData,
+                })
+            );
+        };
+
+        const getAnnotations = (): Observable<any> => {
+            return of(
+                new HttpResponse({
+                    status: 200,
+                    body: JSON.parse(
+                        localStorage.getItem("annotations") || "[]"
+                    ),
+                })
+            );
+        };
+
+        const setAnnotations = (body: any): Observable<any> => {
+            localStorage.setItem("annotations", body["annotations"]);
+            return of(
+                new HttpResponse({
+                    status: 200,
+                    body: JSON.parse(
+                        localStorage.getItem("annotations") || "[]"
+                    ),
                 })
             );
         };

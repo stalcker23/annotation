@@ -9,10 +9,10 @@ import {
 } from "@angular/core";
 import { DragDropModule } from "@angular/cdk/drag-drop";
 import { CdkDrag } from "@angular/cdk/drag-drop";
-import {
-    Annotation,
-    AnnotationType,
-} from "../../core/pages/view/view.component";
+import { Annotation } from "../classes/classes";
+import { AnnotationAnnotationEmmiter } from "../types/types";
+import { AnnotationActions, AnnotationType } from "../enums/enums";
+import { ACTIONS_TAB_HEIGHT, FOOTER_HEIGHT } from "../constants/constants";
 
 @Component({
     selector: "annotation",
@@ -29,12 +29,17 @@ export class AnnotationComponent implements AfterViewInit {
     public removeTextEmmiter = new EventEmitter<number>();
 
     @Output()
-    public updateAnnotationEmmiter = new EventEmitter<Annotation>();
+    public updateAnnotationEmmiter =
+        new EventEmitter<AnnotationAnnotationEmmiter>();
 
     @ViewChild("annotationView", { static: false })
     private annotationView!: ElementRef;
 
     public AnnotationType = AnnotationType;
+
+    public get getBorderColor() {
+        return this.annotation.notSaved ? "yellow" : "green";
+    }
 
     public removeText() {
         this.removeTextEmmiter.next(this.annotation.id);
@@ -51,7 +56,10 @@ export class AnnotationComponent implements AfterViewInit {
         this.annotation.x = annotation.x - imagesContainerX;
         this.annotation.y = annotation.y + window.scrollY;
         this.annotation.notSaved = true;
-        this.updateAnnotationEmmiter.next(this.annotation);
+        this.updateAnnotationEmmiter.next({
+            annotation: this.annotation,
+            annotationAction: AnnotationActions.move,
+        });
     }
 
     public onResize(event: any) {
@@ -59,30 +67,41 @@ export class AnnotationComponent implements AfterViewInit {
         this.annotation.width = annotation.getBoundingClientRect().width;
         this.annotation.height = annotation.getBoundingClientRect().height;
         this.annotation.notSaved = true;
-        this.updateAnnotationEmmiter.next(this.annotation);
+        this.updateAnnotationEmmiter.next({
+            annotation: this.annotation,
+            annotationAction: AnnotationActions.resize,
+        });
     }
 
     public onFocusOut(event: any) {
         const annotation = event.srcElement;
         this.annotation.value = annotation.value;
         this.annotation.notSaved = true;
-        this.updateAnnotationEmmiter.next(this.annotation);
+        this.updateAnnotationEmmiter.next({
+            annotation: this.annotation,
+            annotationAction: AnnotationActions.focus,
+        });
     }
 
     public ngAfterViewInit() {
-        const el = this.annotationView.nativeElement;
-        if (this.annotation.x || this.annotation.y) {
-            el.style.top = this.annotation.y + "px";
-            el.style.left = this.annotation.x + "px";
-        } else {
-            el.style.top = (this.annotation.y = window.scrollY + 112) + "px";
-            el.style.left = this.annotation.x = 0;
-            this.updateAnnotationEmmiter.next(this.annotation);
-        }
+        this.initAnnotationPosiition();
     }
 
-    public get getBorderColor() {
-        return this.annotation.notSaved ? "yellow" : "green";
+    public initAnnotationPosiition() {
+        const annotationView = this.annotationView.nativeElement;
+        if (this.annotation.x || this.annotation.y) {
+            annotationView.style.top = this.annotation.y + "px";
+            annotationView.style.left = this.annotation.x + "px";
+        } else {
+            annotationView.style.top =
+                (this.annotation.y =
+                    window.scrollY + ACTIONS_TAB_HEIGHT + FOOTER_HEIGHT) + "px";
+            annotationView.style.left = this.annotation.x = 0;
+            this.updateAnnotationEmmiter.next({
+                annotation: this.annotation,
+                annotationAction: AnnotationActions.move,
+            });
+        }
     }
 
     public onFileChanged(event: any) {
@@ -90,13 +109,13 @@ export class AnnotationComponent implements AfterViewInit {
         if (files.length === 0) return;
 
         const mimeType = files[0].type;
-        if (mimeType.match(/image\/*/) == null) {
+        if (mimeType.match(/image\/*/) === null) {
             return;
         }
 
         const reader = new FileReader();
         reader.readAsDataURL(files[0]);
-        reader.onload = (_event) => {
+        reader.onload = () => {
             this.annotation.value = reader.result;
         };
     }

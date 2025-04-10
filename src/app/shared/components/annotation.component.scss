@@ -11,12 +11,9 @@
   z-index: 1;
 }
 
-.example-box {
+.annotation-box {
   width: 150px;
   height: 150px;
-}
-
-.example-box {
   padding: 5px 5px 5px 5px;
   border: solid 2px #ccc;
   color: rgba(0, 0, 0, 0.87);
@@ -42,7 +39,7 @@
   }
 }
 
-.example-boundary {
+.annotation-boundary {
   position: absolute;
   cursor: pointer;
 }

@@ -1,14 +1,9 @@
-import {
-    AfterViewInit,
-    Component,
-    Input,
-    OnDestroy,
-    OnInit,
-} from "@angular/core";
+import { AfterViewInit, Component, Input, OnDestroy } from "@angular/core";
 import { Subject } from "rxjs/internal/Subject";
-import { Page } from "../../../../shared/models/models";
 import { ImageViewComponent } from "../image/image-view.component";
 import { ActivatedRoute } from "@angular/router";
+import { Page } from "../../../../shared/types/types";
+import { FOOTER_HEIGHT } from "../../../../shared/constants/constants";
 
 @Component({
     selector: "images",
@@ -26,9 +21,14 @@ export class ImagesComponent implements OnDestroy, AfterViewInit {
     constructor(private route: ActivatedRoute) {}
 
     public ngAfterViewInit(): void {
+        this.scrollToDirectFile();
+    }
+
+    public scrollToDirectFile() {
         const imageId = this.route.snapshot.paramMap.get("image") || "1";
-        const yOffset = -88;
+        const yOffset = -FOOTER_HEIGHT;
         const element = document.getElementById(imageId);
+
         if (element) {
             const y =
                 element.getBoundingClientRect().top + window.scrollY + yOffset;

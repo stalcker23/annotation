@@ -4,42 +4,22 @@ import { Subject } from "rxjs/internal/Subject";
 import { PagesService } from "../../services/pages.service";
 import { ActivatedRoute } from "@angular/router";
 import { takeUntil } from "rxjs";
-import { Page } from "../../../shared/models/models";
 import { ImagesComponent } from "./images/images.component";
 import { AnnotationComponent } from "../../../shared/components/annotation.component";
-
-export enum AnnotationType {
-    Text = "Text",
-    Image = "Image",
-}
-export class Annotation {
-    public id: number;
-    public x: number;
-    public y: number;
-    public height: number;
-    public width: number;
-    public type: AnnotationType;
-    public value: string | ArrayBuffer | null;
-    public notSaved: boolean;
-
-    constructor(initializer: Annotation) {
-        this.height = initializer.height;
-        this.id = initializer.id;
-        this.x = initializer.x;
-        this.y = initializer.y;
-        this.width = initializer.width;
-        this.type = initializer.type;
-        this.value = initializer.value;
-        this.notSaved = initializer.notSaved;
-    }
-}
-export enum Actions {
-    plusScale = "plusScale",
-    minusScale = "minusScale",
-    addText = "addText",
-    addImage = "addImage",
-    save = "save",
-}
+import { AnnotationAnnotationEmmiter, Page } from "../../../shared/types/types";
+import {
+    BASE_ANNOTATION_SIZE,
+    BASE_SCALE_VALUE,
+    MAX_SCALE_VALUE,
+    MIN_SCALE_VALUE,
+    STEP_SCALE_VALUE,
+} from "../../../shared/constants/constants";
+import {
+    ViewActions,
+    AnnotationActions,
+    AnnotationType,
+} from "../../../shared/enums/enums";
+import { Annotation } from "../../../shared/classes/classes";
 
 @Component({
     selector: "view",
@@ -52,10 +32,10 @@ export enum Actions {
 export class ViewComponent implements OnInit, OnDestroy {
     private destroy$ = new Subject<void>();
     public pages: Page[] = [];
-    public scale = 100;
-    public Actions = Actions;
+    public scale = BASE_SCALE_VALUE;
+    public ViewActions = ViewActions;
     public AnnotationType = AnnotationType;
-
+    public AnnotationActions = AnnotationActions;
     public annotations: Annotation[] = [];
 
     constructor(
@@ -65,13 +45,12 @@ export class ViewComponent implements OnInit, OnDestroy {
     ) {}
 
     public ngOnInit(): void {
+        this.initAnnotations();
+        this.initPages();
+    }
+
+    public initPages() {
         const id = this.route.snapshot.paramMap.get("image");
-        const annotations = localStorage.getItem("annotations");
-        if (annotations) {
-            this.annotations = JSON.parse(annotations) || [];
-        } else {
-            localStorage.setItem("annotations", this.annotations.toString());
-        }
 
         if (!this.pagesService.pages.length) {
             this.apiService
@@ -84,26 +63,46 @@ export class ViewComponent implements OnInit, OnDestroy {
         this.pages = this.pagesService.pages;
     }
 
-    public action(operator: Actions) {
-        if (operator === Actions.plusScale && this.scale !== 200) {
-            this.scale += 10;
-        } else if (operator === Actions.minusScale && this.scale !== 50) {
-            this.scale -= 10;
-        } else if (operator === Actions.addText) {
+    public initAnnotations() {
+        this.apiService
+            .getAnnotations()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((res) => {
+                if (res.length) {
+                    this.annotations = res || [];
+                } else {
+                    this.apiService
+                        .setAnnotations(this.annotations.toString())
+                        .pipe(takeUntil(this.destroy$))
+                        .subscribe((res) => {
+                            this.annotations = res;
+                        });
+                }
+            });
+    }
+
+    public action(action: ViewActions) {
+        if (
+            action === ViewActions.plusScale &&
+            this.scale !== MAX_SCALE_VALUE
+        ) {
+            this.scale += STEP_SCALE_VALUE;
+        } else if (
+            action === ViewActions.minusScale &&
+            this.scale !== MIN_SCALE_VALUE
+        ) {
+            this.scale -= STEP_SCALE_VALUE;
+        } else if (action === ViewActions.addText) {
             this.addAnnotation(AnnotationType.Text);
-        } else if (operator === Actions.addImage) {
+        } else if (action === ViewActions.addImage) {
             this.addAnnotation(AnnotationType.Image);
-        } else if (operator === Actions.save) {
+        } else if (action === ViewActions.save) {
             this.saveAnnotations();
         }
     }
 
     public get scaleXY() {
-        return `scale(${this.scale / 100})`;
-    }
-
-    public get scaleMargin() {
-        return `${(1000 * this.scale) / 100}px`;
+        return `scale(${this.scale / BASE_SCALE_VALUE})`;
     }
 
     public addAnnotation(type: AnnotationType) {
@@ -112,11 +111,11 @@ export class ViewComponent implements OnInit, OnDestroy {
 
     public addAnnotationInstance(type: AnnotationType) {
         return new Annotation({
-            height: 150,
+            height: BASE_ANNOTATION_SIZE,
             id: this.annotations.length,
             x: 0,
             y: 0,
-            width: 150,
+            width: BASE_ANNOTATION_SIZE,
             type: type,
             value: "",
             notSaved: true,
@@ -125,14 +124,16 @@ export class ViewComponent implements OnInit, OnDestroy {
 
     public saveAnnotations() {
         try {
-            this.annotations.forEach(
-                (annotation) => (annotation.notSaved = false)
-            );
-            localStorage.setItem(
-                "annotations",
-                JSON.stringify(this.annotations)
-            );
-        } catch (e) {
+            this.annotations.forEach((annotation) => {
+                annotation.notSaved = false;
+            });
+            this.apiService
+                .setAnnotations(JSON.stringify(this.annotations))
+                .pipe(takeUntil(this.destroy$))
+                .subscribe((res) => {
+                    this.annotations = res;
+                });
+        } catch (error) {
             alert("Quota exceeded!");
         }
     }
@@ -143,12 +144,38 @@ export class ViewComponent implements OnInit, OnDestroy {
         );
     }
 
-    public updateAnnotation(changedAnnotation: Annotation) {
+    public normalizeAnnotationProperty(propertyValue: number) {
+        return Math.round((propertyValue / this.scale) * BASE_SCALE_VALUE);
+    }
+
+    public updateAnnotation(event: AnnotationAnnotationEmmiter) {
+        if (event.annotation.notSaved) {
+            switch (event.annotationAction) {
+                case AnnotationActions.move: {
+                    event.annotation.x = this.normalizeAnnotationProperty(
+                        event.annotation.x
+                    );
+                    event.annotation.y = this.normalizeAnnotationProperty(
+                        event.annotation.y
+                    );
+                    break;
+                }
+                case AnnotationActions.resize: {
+                    event.annotation.width = this.normalizeAnnotationProperty(
+                        event.annotation.width
+                    );
+                    event.annotation.height = this.normalizeAnnotationProperty(
+                        event.annotation.height
+                    );
+                    break;
+                }
+            }
+        }
         const changedAnnotationIndex = this.annotations.findIndex(
-            (annotation) => changedAnnotation.id === annotation.id
+            (annotation) => event.annotation.id === annotation.id
         );
         if (!isNaN(changedAnnotationIndex)) {
-            this.annotations[changedAnnotationIndex] = changedAnnotation;
+            this.annotations[changedAnnotationIndex] = event.annotation;
         }
     }
 
