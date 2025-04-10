@@ -15,6 +15,14 @@
     color: $grey;
     background-color: $grey-blue;
   }
+
+  button {
+    cursor: pointer;
+  }
+
+  .scale-value {
+    cursor: not-allowed;
+  }
 }
 
 .images-container {

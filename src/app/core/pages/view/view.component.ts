@@ -82,22 +82,26 @@ export class ViewComponent implements OnInit, OnDestroy {
     }
 
     public action(action: ViewActions) {
-        if (
-            action === ViewActions.plusScale &&
-            this.scale !== MAX_SCALE_VALUE
-        ) {
-            this.scale += STEP_SCALE_VALUE;
-        } else if (
-            action === ViewActions.minusScale &&
-            this.scale !== MIN_SCALE_VALUE
-        ) {
-            this.scale -= STEP_SCALE_VALUE;
-        } else if (action === ViewActions.addText) {
-            this.addAnnotation(AnnotationType.Text);
-        } else if (action === ViewActions.addImage) {
-            this.addAnnotation(AnnotationType.Image);
-        } else if (action === ViewActions.save) {
-            this.saveAnnotations();
+        switch (action) {
+            case ViewActions.plusScale:
+                if (this.scale < MAX_SCALE_VALUE) {
+                    this.scale += STEP_SCALE_VALUE;
+                }
+                break;
+            case ViewActions.minusScale:
+                if (this.scale > MIN_SCALE_VALUE) {
+                    this.scale -= STEP_SCALE_VALUE;
+                }
+                break;
+            case ViewActions.addText:
+                this.addAnnotation(AnnotationType.Text);
+                break;
+            case ViewActions.addImage:
+                this.addAnnotation(AnnotationType.Image);
+                break;
+            case ViewActions.save:
+                this.saveAnnotations();
+                break;
         }
     }
 
